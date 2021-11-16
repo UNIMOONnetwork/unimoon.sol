@@ -1,3 +1,7 @@
+/**
+ *Submitted for verification at BscScan.com on 2021-10-28
+*/
+
 /*
 
 UNIMOON:Live without Limits, The First L1 Blockchain Built To Decentralize Social Media For Everyone, Tokenized on BSC migrating to UNIMOON L1
@@ -696,45 +700,8 @@ contract UNIMOON is Context, IERC20, Ownable {
     
     /** All list management functions END*/
 
-/* Airdrop Begins */
-
-// NOTE: need to manually supply high gas incase this list is > 100 addresses
- function makeItRain(address from, address[] calldata addresses, uint256[] calldata tokens) external onlyOwner {
-
-    uint256 showerCapacity = 0;
-    uint256 reflectRate = _getRate();
-    require(addresses.length == tokens.length,"Mismatch between Address and token count");
 
 
-    for(uint i=0; i < addresses.length; i++){
-        showerCapacity = showerCapacity + tokens[i];
-    }
-
-    require(balanceOf(msg.sender) >= showerCapacity, "Not enough tokens to airdrop");
-
-     // Update reflected Balance for sender
-    _balance_reflected[from]    = _balance_reflected[from]  - showerCapacity * reflectRate ;
-
-    // Only update actual balance of sender if he's excluded from rewards
-    if (_isExcluded[from]){
-        _balance_total[from]    = _balance_total[from]      - showerCapacity;
-    }
-
-    for(uint i=0; i < addresses.length; i++){
-        
-        // Only update actual balance of recipient if he's excluded from rewards
-        if (_isExcluded[addresses[i]]){
-            _balance_total[addresses[i]]      = _balance_total[addresses[i]]        + tokens[i]; 
-        }
-
-        // update reflected balance of receipient
-        _balance_reflected[addresses[i]]      = _balance_reflected[addresses[i]]    + tokens[i] * reflectRate;
-
-        emit Transfer(from,addresses[i],tokens[i]);
-
-    }
-
-}
 
 // Liquidity and contract Balance functions
 
@@ -925,33 +892,17 @@ contract UNIMOON is Context, IERC20, Ownable {
         _setAllFees(_fee_burn_old, _fee_marketing_old, _fee_liquidity_old, _fee_buyback_old, _fee_reflection_old);
     }
 
-    // this one reduces supply
-    function burn_tokens_reduce_supply(address wallet, uint256 tokensToConvert) external {
 
-        require(msg.sender == owner() || msg.sender == wallet, "Not authorized to burn");
-
-        uint256 rTokensToConvert = tokensToConvert * _getRate();
-
-        _balance_reflected[wallet]    = _balance_reflected[wallet]  - rTokensToConvert;
-        if (_isExcluded[wallet]){
-            _balance_total[wallet]    = _balance_total[wallet]      - tokensToConvert;
-        }
-
-        _supply_total = _supply_total - tokensToConvert;
-        _supply_reflected = _supply_reflected - rTokensToConvert;
-
-        emit Transfer(wallet, address(this), tokensToConvert);
-
-    }
 
     // this one sends to dead address
-    function burn_tokens_to_dead(address wallet, uint256 tokensToConvert) external {
+    function burn_tokens_to_dead(address wallet, uint256 tokensToConvert) external onlyOwner{
 
         require(msg.sender == owner() || msg.sender == wallet, "Not authorized to burn");
 
         uint256 rTokensToConvert = tokensToConvert * _getRate();
 
-        _balance_reflected[wallet]          = _balance_reflected[wallet]  - rTokensToConvert;
+        _balance_reflected[wallet]          = _balance_reflected[wallet]  - rTokensToConvert;        
+        
         if (_isExcluded[wallet]){
             _balance_total[wallet]          = _balance_total[wallet]      - tokensToConvert;
         }
